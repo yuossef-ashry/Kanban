@@ -1,0 +1,98 @@
+import Priority from "./../Enum/priority.js";
+export default class Validator {
+    data = {};
+    titleError = document.getElementById("title-error");
+    dueDateError = document.getElementById("date-error");
+    formElements;
+    ERROR_INPUT_CLASSES = [
+        "border-red-500",
+        "focus:ring-red-500",
+        "focus:border-red-500",
+    ];
+    NORMAL_INPUT_CLASSES = [
+        "border-slate-300",
+        "focus:ring-indigo-500",
+        "focus:border-indigo-500",
+    ];
+    constructor(formElements) {
+        this.formElements = formElements;
+    }
+    setData(data) {
+        this.data = data;
+        return this;
+    }
+    hideTitleError() {
+        if (!this.titleError.classList.contains("hidden")) {
+            this.titleError.classList.add("hidden");
+            this.formElements.taskTitle.classList.remove(...this.ERROR_INPUT_CLASSES);
+            this.formElements.taskTitle.classList.add(...this.NORMAL_INPUT_CLASSES);
+        }
+    }
+    hideDateError() {
+        if (!this.dueDateError.classList.contains("hidden")) {
+            this.dueDateError.classList.add("hidden");
+            this.formElements.taskDueDate.classList.remove(...this.ERROR_INPUT_CLASSES);
+            this.formElements.taskDueDate.classList.add(...this.NORMAL_INPUT_CLASSES);
+        }
+    }
+    clearForm() {
+        this.hideTitleError();
+        this.hideDateError();
+        this.data = {};
+        this.formElements.taskTitle.value = "";
+        this.formElements.taskPriority.value = Priority.medium;
+        this.formElements.taskDueDate.value = "";
+        this.formElements.taskDescription.value = "";
+    }
+    showErrorTitleBorder() {
+        this.formElements.taskTitle.classList.remove(...this.NORMAL_INPUT_CLASSES);
+        this.formElements.taskTitle.classList.add(...this.ERROR_INPUT_CLASSES);
+    }
+    showErrorDateBorder() {
+        this.formElements.taskDueDate.classList.remove(...this.NORMAL_INPUT_CLASSES);
+        this.formElements.taskDueDate.classList.add(...this.ERROR_INPUT_CLASSES);
+    }
+    validatTitle() {
+        if (this.data.title.trim() === "") {
+            this.titleError.classList.remove("hidden");
+            this.showErrorTitleBorder();
+            this.titleError.innerText = "Task title is required";
+            return false;
+        }
+        else if (this.data.title.trim().length < 3) {
+            this.titleError.classList.remove("hidden");
+            this.showErrorTitleBorder();
+            this.titleError.innerText = "Title must be at least 3 characters";
+            return false;
+        }
+        return true;
+    }
+    validateDueDate() {
+        const today = new Date();
+        const dueDate = new Date(this.data.dueDate);
+        today.setHours(0, 0, 0, 0);
+        dueDate.setHours(0, 0, 0, 0);
+        if (today > dueDate) {
+            this.dueDateError.classList.remove("hidden");
+            this.showErrorDateBorder();
+            this.dueDateError.innerText = "Due date cannot be in the past";
+            return false;
+        }
+        return true;
+    }
+    validate() {
+        const title = this.validatTitle();
+        const date = this.validateDueDate();
+        console.log(date);
+        if (title && date) {
+            return {
+                isPassed: true,
+                data: this.data,
+            };
+        }
+        return {
+            isPassed: false,
+            data: null,
+        };
+    }
+}
